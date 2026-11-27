@@ -416,6 +416,8 @@ async function startServer() {
         body.mode === 'byte_blaster' ||
         body.mode === 'circuit_grid' ||
         body.mode === 'tower_climb' ||
+        body.mode === 'heart_quest' ||
+        body.mode === 'pixel_boss' ||
         body.mode === 'classic'
           ? body.mode
           : 'classic';
@@ -816,7 +818,14 @@ async function startServer() {
       }
 
       if (Array.isArray(body.enabledGames)) {
-        const allowed: QuizMode[] = ['classic', 'byte_blaster', 'circuit_grid', 'tower_climb'];
+        const allowed: QuizMode[] = [
+          'classic',
+          'byte_blaster',
+          'circuit_grid',
+          'tower_climb',
+          'heart_quest',
+          'pixel_boss'
+        ];
         const filtered = body.enabledGames.filter((g: unknown): g is QuizMode =>
           typeof g === 'string' && allowed.includes(g as QuizMode)
         );

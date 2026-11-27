@@ -64,7 +64,14 @@ function createDefaultState(): DatabaseState {
     settings: {
       enabledTopics: SYLLABUS_TOPICS.map((t) => t.id),
       requireNotesBeforeQuiz: true,
-      enabledGames: ['classic', 'byte_blaster', 'circuit_grid', 'tower_climb']
+      enabledGames: [
+        'classic',
+        'byte_blaster',
+        'circuit_grid',
+        'tower_climb',
+        'heart_quest',
+        'pixel_boss'
+      ]
     },
     resetTokens: {}
   };
