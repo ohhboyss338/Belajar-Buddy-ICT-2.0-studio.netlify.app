@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Award, Medal, RefreshCw, Trophy } from 'lucide-react';
+import { Award, Medal, RefreshCw, Trophy, X } from 'lucide-react';
 import type { PublicUser, RankingEntry, TopicSummaryForUser } from '../../shared/types.ts';
 import { api } from '../lib/api.ts';
+import { mapFirebaseAuthError } from '../lib/firebase.ts';
 
 interface RankingsViewProps {
   currentUser: PublicUser;
@@ -28,7 +29,7 @@ export function RankingsView({
       const res = await api.getRankings(tab === 'all' ? undefined : tab);
       setRankings(res.rankings);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load rankings.');
+      setError(mapFirebaseAuthError(err, 'Unable to load rankings.'));
     } finally {
       setLoading(false);
     }
@@ -108,8 +109,19 @@ export function RankingsView({
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-[#2D101B] border border-[#881337] text-[#FECDD3] text-sm">
-          {error}
+        <div
+          role="alert"
+          className="p-4 rounded-xl bg-[#2D101B] border border-[#881337] text-[#FECDD3] text-sm flex items-start justify-between gap-3"
+        >
+          <span className="break-words">{error}</span>
+          <button
+            type="button"
+            aria-label="Dismiss error message"
+            onClick={() => setError(null)}
+            className="text-[#FDA4AF] hover:text-[#FFF1F2] shrink-0 cursor-pointer mt-0.5"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 

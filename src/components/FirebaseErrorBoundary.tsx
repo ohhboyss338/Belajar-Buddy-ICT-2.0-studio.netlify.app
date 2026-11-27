@@ -1,5 +1,6 @@
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
+import { mapFirebaseAuthError } from '../lib/firebase.ts';
 
 interface State {
   hasError: boolean;
@@ -16,12 +17,10 @@ export class FirebaseErrorBoundary extends React.Component<
   }
 
   static getDerivedStateFromError(error: Error): State {
-    let message = error.message || 'An unexpected error occurred.';
-    if (message.startsWith('{') && message.includes('"operationType"')) {
-      message =
-        'A database permission or configuration error occurred. Please sign out and sign back in, or verify your Firebase rules.';
-    }
-    return { hasError: true, message };
+    return {
+      hasError: true,
+      message: mapFirebaseAuthError(error, 'An unexpected error occurred.')
+    };
   }
 
   render() {

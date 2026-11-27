@@ -435,10 +435,12 @@ export const api = {
         }
       };
     } catch (err) {
-      if (createdUser && err instanceof Error && err.message.startsWith('{')) {
-        throw new Error(mapFirebaseAuthError(err));
+      if (createdUser) {
+        await createdUser.delete().catch(() => {});
       }
-      throw new Error(mapFirebaseAuthError(err));
+      throw new Error(
+        mapFirebaseAuthError(err, 'Unable to create account. Please try again.')
+      );
     }
   },
 
@@ -484,7 +486,7 @@ export const api = {
 
       return { user: profile };
     } catch (err) {
-      throw new Error(mapFirebaseAuthError(err));
+      throw new Error(mapFirebaseAuthError(err, 'Unable to log in. Please try again.'));
     }
   },
 
@@ -499,7 +501,9 @@ export const api = {
         message: `Password reset email sent to ${email}. Check your inbox (and spam folder) and follow the link to set a new password.`
       };
     } catch (err) {
-      throw new Error(mapFirebaseAuthError(err));
+      throw new Error(
+        mapFirebaseAuthError(err, 'Unable to send password reset email.')
+      );
     }
   },
 
@@ -896,10 +900,10 @@ export const api = {
       await setDoc(doc(db, 'rankings', attemptId), {
         attemptId,
         userId: current.uid,
-        studentName: session.studentName.slice(0, 100),
-        className: session.className.slice(0, 64),
+        studentName: (session.studentName || 'Student').trim().slice(0, 100) || 'Student',
+        className: (session.className || 'Unassigned').trim().slice(0, 64) || 'Unassigned',
         topicId: session.topicId,
-        topicTitle: session.topicTitle.slice(0, 160),
+        topicTitle: (session.topicTitle || `Topic ${session.topicId}`).slice(0, 160),
         mode: session.mode,
         questionFilter: session.questionFilter,
         score,

@@ -103,7 +103,62 @@ export function handleFirestoreError(
   throw new Error(JSON.stringify(errInfo));
 }
 
-export function mapFirebaseAuthError(error: unknown): string {
+function formatFirestoreJsonError(
+  rawMessage: string,
+  fallback: string
+): string | null {
+  const trimmed = rawMessage.trim();
+  if (!trimmed.startsWith('{') || !trimmed.includes('"operationType"')) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed) as Partial<FirestoreErrorInfo>;
+    const inner = String(parsed.error || '').toLowerCase();
+    const dbId = firebaseConfig.firestoreDatabaseId || '(default)';
+    const upgradeUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/databases/${dbId}/data?openUpgradeDialog=true`;
+
+    if (
+      inner.includes('quota exceeded') ||
+      inner.includes('free daily read units') ||
+      inner.includes('resource-exhausted')
+    ) {
+      return `Daily database read quota reached. The free-tier quota resets tomorrow, or your administrator can upgrade in Firebase Console: ${upgradeUrl}`;
+    }
+
+    if (
+      inner.includes('the client is offline') ||
+      inner.includes('offline') ||
+      inner.includes('unavailable') ||
+      inner.includes('network')
+    ) {
+      return 'Network issue: unable to reach Firestore because your connection is offline or unavailable. Check your internet connection and try again.';
+    }
+
+    if (inner.includes('unauthenticated')) {
+      return 'Your session has expired. Please log out and sign back in to continue.';
+    }
+
+    if (
+      inner.includes('missing or insufficient permissions') ||
+      inner.includes('permission-denied')
+    ) {
+      if (parsed.path?.startsWith('users/') || parsed.path?.startsWith('admins/')) {
+        return 'Database permission error while accessing your account profile. Please log out and sign back in, or verify Firestore rules are deployed.';
+      }
+      return `Database permission error${parsed.path ? ` (${parsed.path})` : ''}. Please make sure you are signed in with the required permissions and Firestore rules are deployed.`;
+    }
+
+    return fallback;
+  } catch {
+    return 'Database permission or configuration error. Please sign out and sign back in, or verify your Firestore rules.';
+  }
+}
+
+export function mapFirebaseAuthError(
+  error: unknown,
+  fallback = 'Something went wrong. Please try again.'
+): string {
   const code =
     typeof error === 'object' && error !== null && 'code' in error
       ? String((error as { code?: unknown }).code || '')
@@ -111,6 +166,7 @@ export function mapFirebaseAuthError(error: unknown): string {
 
   switch (code) {
     case 'auth/invalid-credential':
+    case 'auth/invalid-login-credentials':
     case 'auth/wrong-password':
     case 'auth/user-not-found':
       return 'Invalid email or password. Please check your credentials and try again.';
@@ -130,20 +186,53 @@ export function mapFirebaseAuthError(error: unknown): string {
       return 'Network error: unable to reach Firebase Authentication. Check your internet connection and try again.';
     case 'auth/operation-not-allowed':
       return 'Email/Password sign-in is not enabled in Firebase Console yet. Enable it under Authentication -> Sign-in method -> Email/Password.';
+    case 'auth/configuration-not-found':
+      return 'Firebase Authentication is not configured for this project yet. Enable Email/Password under Authentication -> Sign-in method.';
     case 'auth/unauthorized-domain':
       return 'This website domain is not authorized in Firebase Authentication. Add your domain in Firebase Console -> Authentication -> Settings -> Authorized domains.';
     case 'auth/invalid-api-key':
       return 'Firebase API key configuration is invalid. Check your Firebase settings.';
-    default:
+    case 'auth/user-token-expired':
+    case 'auth/requires-recent-login':
+      return 'Your login session has expired. Please sign out and sign back in to continue.';
+    case 'auth/quota-exceeded':
+      return 'Authentication request limit reached temporarily. Please wait a moment and try again.';
+    case 'auth/internal-error':
+      return 'Authentication service encountered a temporary error. Please check your connection and try again.';
+    case 'permission-denied':
+      return 'Database permission error. Please sign out and sign back in, or verify Firestore rules are deployed.';
+    case 'unavailable':
+      return 'Database is temporarily unavailable. Check your internet connection and try again.';
+    case 'resource-exhausted': {
+      const dbId = firebaseConfig.firestoreDatabaseId || '(default)';
+      return `Daily database quota reached. The free-tier quota resets tomorrow, or your administrator can upgrade in Firebase Console: https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/databases/${dbId}/data?openUpgradeDialog=true`;
+    }
+    default: {
       if (error instanceof Error) {
-        if (error.message.startsWith('{') && error.message.includes('"operationType"')) {
-          return 'Database permission error. Ensure Email/Password sign-in is configured and Firestore rules are deployed.';
+        const formattedJson = formatFirestoreJsonError(error.message, fallback);
+        if (formattedJson) {
+          return formattedJson;
         }
-        return error.message;
+        const lower = error.message.toLowerCase();
+        if (lower.includes('quota exceeded') || lower.includes('free daily read units')) {
+          const dbId = firebaseConfig.firestoreDatabaseId || '(default)';
+          return `Daily database read quota reached. The free-tier quota resets tomorrow, or your administrator can upgrade in Firebase Console: https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/databases/${dbId}/data?openUpgradeDialog=true`;
+        }
+        if (lower.includes('the client is offline')) {
+          return 'You appear to be offline. Reconnect to the internet and try again.';
+        }
+        return error.message || fallback;
       }
-      return 'Authentication failed. Please try again.';
+      if (typeof error === 'string' && error.trim()) {
+        const formattedJson = formatFirestoreJsonError(error, fallback);
+        return formattedJson || error;
+      }
+      return fallback;
+    }
   }
 }
+
+export const formatFirebaseError = mapFirebaseAuthError;
 
 export async function sha256Hex(value: string): Promise<string> {
   const data = new TextEncoder().encode(value);

@@ -6,7 +6,8 @@ import {
   ChevronDown,
   LogOut,
   ShieldCheck,
-  Trophy
+  Trophy,
+  X
 } from 'lucide-react';
 import type {
   AppSettings,
@@ -134,7 +135,7 @@ export default function App() {
         )
       );
     } catch (err) {
-      setAppError(err instanceof Error ? err.message : 'Could not update notes progress.');
+      setAppError(mapFirebaseAuthError(err, 'Could not update notes progress.'));
     }
   }
 
@@ -148,7 +149,7 @@ export default function App() {
         )
       );
     } catch (err) {
-      setAppError(err instanceof Error ? err.message : 'Could not mark notes complete.');
+      setAppError(mapFirebaseAuthError(err, 'Could not mark notes complete.'));
     }
   }
 
@@ -165,7 +166,7 @@ export default function App() {
       setLastResult(null);
       setActiveSession(session);
     } catch (err) {
-      setAppError(err instanceof Error ? err.message : 'Unable to start quiz session.');
+      setAppError(mapFirebaseAuthError(err, 'Unable to start quiz session.'));
     } finally {
       setStartingQuiz(false);
     }
@@ -178,6 +179,7 @@ export default function App() {
   }
 
   async function handleLogout() {
+    setAppError(null);
     try {
       await api.logout();
     } finally {
@@ -253,6 +255,7 @@ export default function App() {
               onClick={() => {
                 setView('learn');
                 setActiveSession(null);
+                setAppError(null);
               }}
               className={`px-3.5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 view === 'learn'
@@ -269,6 +272,7 @@ export default function App() {
               onClick={() => {
                 setView('rankings');
                 setActiveSession(null);
+                setAppError(null);
               }}
               className={`px-3.5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 view === 'rankings'
@@ -286,6 +290,7 @@ export default function App() {
                 onClick={() => {
                   setView('admin');
                   setActiveSession(null);
+                  setAppError(null);
                 }}
                 className={`px-3.5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   view === 'admin'
@@ -319,9 +324,17 @@ export default function App() {
           <div className="max-w-7xl mx-auto px-6 pt-6">
             <div
               role="alert"
-              className="px-4 py-3 rounded-xl bg-[#2D101B] border border-[#881337] text-[#FECDD3] text-sm"
+              className="px-4 py-3 rounded-xl bg-[#2D101B] border border-[#881337] text-[#FECDD3] text-sm flex items-start justify-between gap-3"
             >
-              {appError}
+              <span className="break-words">{appError}</span>
+              <button
+                type="button"
+                aria-label="Dismiss error message"
+                onClick={() => setAppError(null)}
+                className="text-[#FDA4AF] hover:text-[#FFF1F2] shrink-0 cursor-pointer mt-0.5"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
         )}

@@ -31,6 +31,7 @@ import type {
   TopicSummaryForUser
 } from '../../shared/types.ts';
 import { api } from '../lib/api.ts';
+import { mapFirebaseAuthError } from '../lib/firebase.ts';
 
 interface TeacherAdminViewProps {
   topics: TopicSummaryForUser[];
@@ -123,7 +124,7 @@ export function TeacherAdminView({ topics, onDataUpdated }: TeacherAdminViewProp
       setOverview(res);
       setSettingsDraft(res.settings);
     } catch (err) {
-      setBannerError(err instanceof Error ? err.message : 'Unable to load teacher overview.');
+      setBannerError(mapFirebaseAuthError(err, 'Unable to load teacher overview.'));
     } finally {
       setLoadingOverview(false);
     }
@@ -141,7 +142,7 @@ export function TeacherAdminView({ topics, onDataUpdated }: TeacherAdminViewProp
       setQuestions(res.questions);
       setVisibleLimit(25);
     } catch (err) {
-      setBannerError(err instanceof Error ? err.message : 'Unable to load questions.');
+      setBannerError(mapFirebaseAuthError(err, 'Unable to load questions.'));
     } finally {
       setLoadingQuestions(false);
     }
@@ -296,7 +297,7 @@ export function TeacherAdminView({ topics, onDataUpdated }: TeacherAdminViewProp
       }
       await Promise.all([loadQuestions(), loadOverview(), onDataUpdated()]);
     } catch (err) {
-      setBannerError(err instanceof Error ? err.message : 'Unable to save question.');
+      setBannerError(mapFirebaseAuthError(err, 'Unable to save question.'));
     } finally {
       setSavingQuestion(false);
     }
@@ -311,7 +312,7 @@ export function TeacherAdminView({ topics, onDataUpdated }: TeacherAdminViewProp
       setBannerSuccess('Question removed.');
       await Promise.all([loadQuestions(), loadOverview(), onDataUpdated()]);
     } catch (err) {
-      setBannerError(err instanceof Error ? err.message : 'Unable to delete question.');
+      setBannerError(mapFirebaseAuthError(err, 'Unable to delete question.'));
     }
   }
 
@@ -332,7 +333,7 @@ export function TeacherAdminView({ topics, onDataUpdated }: TeacherAdminViewProp
       );
       await loadOverview();
     } catch (err) {
-      setBannerError(err instanceof Error ? err.message : 'Action failed.');
+      setBannerError(mapFirebaseAuthError(err, 'Action failed.'));
     } finally {
       setBusyStudentId(null);
     }
@@ -349,7 +350,7 @@ export function TeacherAdminView({ topics, onDataUpdated }: TeacherAdminViewProp
       setBannerSuccess('App controls saved and applied immediately.');
       await onDataUpdated();
     } catch (err) {
-      setBannerError(err instanceof Error ? err.message : 'Unable to save settings.');
+      setBannerError(mapFirebaseAuthError(err, 'Unable to save settings.'));
     } finally {
       setSavingSettings(false);
     }

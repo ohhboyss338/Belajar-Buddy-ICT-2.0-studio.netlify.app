@@ -7,10 +7,12 @@ import {
   Network,
   ShieldCheck,
   Trophy,
-  UserCheck
+  UserCheck,
+  X
 } from 'lucide-react';
 import type { PublicUser } from '../../shared/types.ts';
 import { api } from '../lib/api.ts';
+import { mapFirebaseAuthError } from '../lib/firebase.ts';
 
 interface AuthViewProps {
   onAuthenticated: (user: PublicUser) => void;
@@ -62,7 +64,7 @@ export function AuthView({ onAuthenticated, onAuthPendingChange }: AuthViewProps
       });
       onAuthenticated(res.user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to log in. Please try again.');
+      setError(mapFirebaseAuthError(err, 'Unable to log in. Please try again.'));
     } finally {
       onAuthPendingChange?.(false);
       setLoading(false);
@@ -86,7 +88,7 @@ export function AuthView({ onAuthenticated, onAuthPendingChange }: AuthViewProps
       });
       onAuthenticated(res.user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to sign up. Please try again.');
+      setError(mapFirebaseAuthError(err, 'Unable to sign up. Please try again.'));
     } finally {
       onAuthPendingChange?.(false);
       setLoading(false);
@@ -104,7 +106,7 @@ export function AuthView({ onAuthenticated, onAuthPendingChange }: AuthViewProps
       setLoginEmail(recEmail.trim());
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Unable to send password reset email.'
+        mapFirebaseAuthError(err, 'Unable to send password reset email.')
       );
     } finally {
       setLoading(false);
@@ -272,15 +274,31 @@ export function AuthView({ onAuthenticated, onAuthPendingChange }: AuthViewProps
           {error && (
             <div
               role="alert"
-              className="mb-4 px-4 py-3 rounded-lg bg-[#2D101B] border border-[#881337] text-[#FECDD3] text-sm"
+              className="mb-4 px-4 py-3 rounded-lg bg-[#2D101B] border border-[#881337] text-[#FECDD3] text-sm flex items-start justify-between gap-3"
             >
-              {error}
+              <span className="break-words">{error}</span>
+              <button
+                type="button"
+                aria-label="Dismiss error message"
+                onClick={() => setError(null)}
+                className="text-[#FDA4AF] hover:text-[#FFF1F2] shrink-0 cursor-pointer mt-0.5"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-4 px-4 py-3 rounded-lg bg-[#0D3833] border border-[#1F6B62] text-[#99F6E4] text-sm">
-              {successMsg}
+            <div className="mb-4 px-4 py-3 rounded-lg bg-[#0D3833] border border-[#1F6B62] text-[#99F6E4] text-sm flex items-start justify-between gap-3">
+              <span className="break-words">{successMsg}</span>
+              <button
+                type="button"
+                aria-label="Dismiss message"
+                onClick={() => setSuccessMsg(null)}
+                className="text-[#5EEAD4] hover:text-[#E9F5F2] shrink-0 cursor-pointer mt-0.5"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           )}
 
