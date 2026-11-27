@@ -1,0 +1,351 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated student or teacher account profile with PII isolation.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "minLength": 5,
+          "maxLength": 254
+        },
+        "role": {
+          "type": "string",
+          "enum": ["student", "teacher"]
+        },
+        "className": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        }
+      },
+      "required": ["uid", "name", "email", "role", "className", "createdAt", "updatedAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Verified teacher/admin privilege marker document.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "codeDigest": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "codeDigest", "createdAt"]
+    },
+    "NotesProgressTopic": {
+      "title": "NotesProgressTopic",
+      "description": "Per-topic Mind Map reading progress for a single user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "topicId": {
+          "type": "integer"
+        },
+        "readNodeIds": {
+          "type": "array"
+        },
+        "completed": {
+          "type": "boolean"
+        },
+        "completedAt": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "topicId", "readNodeIds", "completed", "updatedAt"]
+    },
+    "TopicAssignment": {
+      "title": "TopicAssignment",
+      "description": "Questions previously assigned to a specific student for a topic.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "topicId": {
+          "type": "integer"
+        },
+        "questionIds": {
+          "type": "array"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "topicId", "questionIds", "updatedAt"]
+    },
+    "QuestionUsage": {
+      "title": "QuestionUsage",
+      "description": "Non-PII global topic pool tracking which questions have already been assigned to students so peers receive non-overlapping sets.",
+      "type": "object",
+      "properties": {
+        "topicId": {
+          "type": "integer"
+        },
+        "usedIds": {
+          "type": "array"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["topicId", "usedIds", "updatedAt"]
+    },
+    "RankingAttempt": {
+      "title": "RankingAttempt",
+      "description": "Public-to-authenticated quiz/game score entry without PII (no email).",
+      "type": "object",
+      "properties": {
+        "attemptId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "studentName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "className": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "topicId": {
+          "type": "integer"
+        },
+        "topicTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["classic", "byte_blaster", "circuit_grid", "tower_climb", "heart_quest", "pixel_boss"]
+        },
+        "questionFilter": {
+          "type": "string",
+          "enum": ["mcq", "fill_blank", "mixed"]
+        },
+        "score": {
+          "type": "integer"
+        },
+        "totalQuestions": {
+          "type": "integer"
+        },
+        "percentage": {
+          "type": "integer"
+        },
+        "timeTakenSeconds": {
+          "type": "integer"
+        },
+        "completedAt": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "isPublicRanking": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "attemptId",
+        "userId",
+        "studentName",
+        "className",
+        "topicId",
+        "topicTitle",
+        "mode",
+        "questionFilter",
+        "score",
+        "totalQuestions",
+        "percentage",
+        "timeTakenSeconds",
+        "completedAt",
+        "isPublicRanking",
+        "createdAt"
+      ]
+    },
+    "CustomQuestion": {
+      "title": "CustomQuestion",
+      "description": "Teacher-created, edited, or soft-deleted question bank override.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "topicId": {
+          "type": "integer"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["mcq", "fill_blank"]
+        },
+        "subtopicCode": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 24
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "options": {
+          "type": "array"
+        },
+        "correctAnswer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "acceptedAnswers": {
+          "type": "array"
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "deleted"]
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "topicId",
+        "type",
+        "subtopicCode",
+        "prompt",
+        "options",
+        "correctAnswer",
+        "acceptedAnswers",
+        "explanation",
+        "status",
+        "updatedAt"
+      ]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Teacher-controlled topic locks, notes gate toggle, and enabled games.",
+      "type": "object",
+      "properties": {
+        "enabledTopics": {
+          "type": "array"
+        },
+        "requireNotesBeforeQuiz": {
+          "type": "boolean"
+        },
+        "enabledGames": {
+          "type": "array"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["enabledTopics", "requireNotesBeforeQuiz", "enabledGames", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user account metadata including email (PII). Readable only by owner or admin."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Verified teacher/admin privilege collection used by isAdmin()."
+    },
+    "/users/{userId}/notesProgress/{topicId}": {
+      "schema": { "$ref": "#/entities/NotesProgressTopic" },
+      "description": "Student Mind Map reading progress per topic (1..11)."
+    },
+    "/users/{userId}/assignments/{topicId}": {
+      "schema": { "$ref": "#/entities/TopicAssignment" },
+      "description": "Per-student seen question IDs per topic (1..11)."
+    },
+    "/questionUsage/{topicId}": {
+      "schema": { "$ref": "#/entities/QuestionUsage" },
+      "description": "Global per-topic assigned question IDs to minimize overlap across peers."
+    },
+    "/rankings/{attemptId}": {
+      "schema": { "$ref": "#/entities/RankingAttempt" },
+      "description": "Quiz and arcade game attempts displayed in Topic Rankings tabs (no email PII)."
+    },
+    "/questions/{questionId}": {
+      "schema": { "$ref": "#/entities/CustomQuestion" },
+      "description": "Teacher-managed custom question bank additions, edits, and deletions."
+    },
+    "/settings/app": {
+      "schema": { "$ref": "#/entities/AppSettings" },
+      "description": "Global classroom settings configured by Teacher Admin."
+    }
+  }
+}

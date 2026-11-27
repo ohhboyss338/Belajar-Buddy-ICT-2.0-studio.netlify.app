@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --bg-canvas: #071716;
+    --bg-surface: #0e2927;
+    --bg-subtle: #133633;
+    --border-hairline: #1e4d48;
+    --ink-primary: #e9f5f2;
+    --ink-secondary: #98beb6;
+    --accent-primary: #14b8a6;
+    --accent-primary-hover: #0d9488;
+    --accent-cobalt: #38bdf8;
+    --accent-amber: #f59e0b;
+    --accent-heart: #f43f5e;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-canvas);
+    color: var(--ink-primary);
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes heartBreak {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.25) rotate(-8deg);
+  }
+  65% {
+    transform: scale(0.82) rotate(6deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-heart-break {
+  animation: heartBreak 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
